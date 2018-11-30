@@ -94,6 +94,7 @@ Spectrum GridDensityMediumRayMarch::Sample(const Ray &rWorld, Sampler &sampler,
         {
             // proceed further
             accumTau += temp;
+            t += stepSize;
         }
     }
     return Spectrum(1.f);
@@ -116,11 +117,11 @@ Spectrum GridDensityMediumRayMarch::Tr(const Ray &rWorld, Sampler &sampler) cons
         ++nTrSteps;
         t += stepSize;
         if (t >= tMax) break;
-        tau += Density(ray(t)) * stepSize;
+        tau += sigma_t * Density(ray(t)) * stepSize;
     }
 
     // compute transmittance
-    Float Tr = std::expf(tau);
+    Float Tr = std::expf(-tau);
     return Spectrum(Tr);
 }
 
