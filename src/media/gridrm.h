@@ -64,7 +64,7 @@ class GridDensityMediumRayMarch : public Medium {
           density(new Float[nx * ny * nz]),
           stepSize(_stepSize)
     {
-        densityBytes += nx * ny * nz * sizeof(Float);
+        densityBytesRM += nx * ny * nz * sizeof(Float);
         memcpy((Float *)density.get(), d, sizeof(Float) * nx * ny * nz);
         // Precompute values for Monte Carlo sampling of _GridDensityMedium_
         sigma_t = (sigma_a + sigma_s)[0];
