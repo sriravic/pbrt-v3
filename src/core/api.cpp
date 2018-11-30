@@ -113,6 +113,7 @@
 #include "textures/windy.h"
 #include "textures/wrinkled.h"
 #include "media/grid.h"
+#include "media/gridrm.h"
 #include "media/homogeneous.h"
 
 #include <map>
@@ -701,7 +702,10 @@ std::shared_ptr<Medium> MakeMedium(const std::string &name,
     Medium *m = NULL;
     if (name == "homogeneous") {
         m = new HomogeneousMedium(sig_a, sig_s, g);
-    } else if (name == "heterogeneous") {
+    } else if (name == "heterogeneous" || name == "heterogeneousrm") {
+
+        bool raymarch = (name == "heterogeneousrm");
+        Float stepSize = paramSet.FindOneFloat("step", 0.0125f);
         int nitems;
         const Float *data = paramSet.FindFloat("density", &nitems);
         if (!data) {
@@ -722,8 +726,18 @@ std::shared_ptr<Medium> MakeMedium(const std::string &name,
         }
         Transform data2Medium = Translate(Vector3f(p0)) *
                                 Scale(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z);
-        m = new GridDensityMedium(sig_a, sig_s, g, nx, ny, nz,
-                                  medium2world * data2Medium, data);
+        if (!raymarch)
+        {
+            Warning("Tracking Employed!");
+            m = new GridDensityMedium(sig_a, sig_s, g, nx, ny, nz,
+                medium2world * data2Medium, data);
+        }
+        else
+        {
+            Warning("RayMarching Employed");
+            m = new GridDensityMediumRayMarch(sig_a, sig_s, g, nx, ny, nz,
+                medium2world * data2Medium, data, stepSize);
+        }
     } else
         Warning("Medium \"%s\" unknown.", name.c_str());
     paramSet.ReportUnused();
