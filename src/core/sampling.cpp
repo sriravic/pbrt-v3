@@ -69,7 +69,12 @@ static constexpr float lambda = 0.5;
 static constexpr float i0 = 0.700;
 static float mymod(float val) { return val - std::floor(val); }
 
-static Point2f r2_dim(int n)
+static float r2_dim1(int n)
+{
+    return mymod(phi_1 * n);
+}
+
+static Point2f r2_dim2(int n)
 {
     static const float a1 = 1.0f / phi_2;
     static const float a2 = 1.0f / (phi_2 * phi_2);
@@ -80,15 +85,15 @@ static Point2f r2_dim(int n)
 
 void R2Sequences1D(Float* samples, int nsamples, RNG& rng, bool jitter)
 {
-    // call that function for now.
-    StratifiedSample1D(samples, nsamples, rng, jitter);
+    for (int i = 0; i < nsamples; i++)
+	samples[i] = mymod(r2_dim1(i) + rng.UniformFloat());
 }
 
 void R2Sequences2D(Point2f* samples, int nx, int ny, RNG& rng, bool bjitter)
 {
     for (int i = 0; i < nx * ny; i++)
     {
-	auto pt = r2_dim(i + 1);
+	auto pt = r2_dim2(i + 1);
 	Point2f jitter(0.f, 0.f);
 	if(bjitter)
 	    jitter = Point2f(rng.UniformFloat(), rng.UniformFloat());
