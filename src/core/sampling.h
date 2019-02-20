@@ -51,6 +51,10 @@ void StratifiedSample1D(Float *samples, int nsamples, RNG &rng,
                         bool jitter = true);
 void StratifiedSample2D(Point2f *samples, int nx, int ny, RNG &rng,
                         bool jitter = true);
+
+void R2Sequences1D(Float* samples, int nsamples, RNG& rng, bool jitter = true);
+void R2Sequences2D(Point2f* samples, int nx, int ny, RNG& rng, bool jitter = true);
+
 void LatinHypercube(Float *samples, int nSamples, int nDim, RNG &rng);
 struct Distribution1D {
     // Distribution1D Public Methods

@@ -59,6 +59,46 @@ void StratifiedSample2D(Point2f *samp, int nx, int ny, RNG &rng, bool jitter) {
         }
 }
 
+static constexpr float phi_1 = 1.6180339887498948482f;
+static constexpr float phi_2 = 1.32471795724474602596f;
+static constexpr float phi_3 = 1.22074408460575947536f;
+static constexpr float kPi = 3.14159265358979323846;
+static constexpr float rootPi = 1.7724538509055160272981674833411f;
+static constexpr float delta0 = 0.76;
+static constexpr float lambda = 0.5;
+static constexpr float i0 = 0.700;
+static float mymod(float val) { return val - std::floor(val); }
+
+static Point2f r2_dim(int n)
+{
+    static const float a1 = 1.0f / phi_2;
+    static const float a2 = 1.0f / (phi_2 * phi_2);
+    float x = mymod(0.5 + a1 * n);
+    float y = mymod(0.5 + a2 * n);
+    return Point2f(x, y);
+}
+
+void R2Sequences1D(Float* samples, int nsamples, RNG& rng, bool jitter)
+{
+    // call that function for now.
+    StratifiedSample1D(samples, nsamples, rng, jitter);
+}
+
+void R2Sequences2D(Point2f* samples, int nx, int ny, RNG& rng, bool bjitter)
+{
+    for (int i = 0; i < nx * ny; i++)
+    {
+	auto pt = r2_dim(i + 1);
+	Point2f jitter(0.f, 0.f);
+	if(bjitter)
+	    jitter = Point2f(rng.UniformFloat(), rng.UniformFloat());
+	float factor = lambda * delta0 * rootPi * 0.25 / std::sqrt((i + 1) - i0);
+	float x = mymod(pt.x + factor * jitter.x);
+	float y = mymod(pt.y + factor * jitter.y);
+	samples[i] = Point2f(x, y);
+    }
+}
+
 void LatinHypercube(Float *samples, int nSamples, int nDim, RNG &rng) {
     // Generate LHS samples along diagonal
     Float invNSamples = (Float)1 / nSamples;

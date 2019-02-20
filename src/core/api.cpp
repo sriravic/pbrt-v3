@@ -86,6 +86,7 @@
 #include "samplers/random.h"
 #include "samplers/sobol.h"
 #include "samplers/stratified.h"
+#include "samplers/r2sequences.h"
 #include "samplers/zerotwosequence.h"
 #include "shapes/cone.h"
 #include "shapes/curve.h"
@@ -699,6 +700,11 @@ std::shared_ptr<Medium> MakeMedium(const std::string &name,
     Float g = paramSet.FindOneFloat("g", 0.0f);
     sig_a = paramSet.FindOneSpectrum("sigma_a", sig_a) * scale;
     sig_s = paramSet.FindOneSpectrum("sigma_s", sig_s) * scale;
+    int octaves = paramSet.FindOneInt("octaves", 8);
+    float omega = paramSet.FindOneFloat("omega", 1.0f);
+    float radius = paramSet.FindOneFloat("radius", 0.5f);
+    int method = paramSet.FindOneInt("method", 0);
+
     Medium *m = NULL;
     if (name == "homogeneous") {
         m = new HomogeneousMedium(sig_a, sig_s, g);
@@ -730,13 +736,13 @@ std::shared_ptr<Medium> MakeMedium(const std::string &name,
         {
             Warning("Tracking Employed!");
             m = new GridDensityMedium(sig_a, sig_s, g, nx, ny, nz,
-                medium2world * data2Medium, data);
+                medium2world * data2Medium, data, omega, octaves, radius, method);
         }
         else
         {
             Warning("RayMarching Employed");
             m = new GridDensityMediumRayMarch(sig_a, sig_s, g, nx, ny, nz,
-                medium2world * data2Medium, data, stepSize);
+                medium2world * data2Medium, data, stepSize, omega, octaves, radius, method);
         }
     } else
         Warning("Medium \"%s\" unknown.", name.c_str());
@@ -836,17 +842,19 @@ std::shared_ptr<Sampler> MakeSampler(const std::string &name,
                                      const Film *film) {
     Sampler *sampler = nullptr;
     if (name == "lowdiscrepancy" || name == "02sequence")
-        sampler = CreateZeroTwoSequenceSampler(paramSet);
+	sampler = CreateZeroTwoSequenceSampler(paramSet);
     else if (name == "maxmindist")
-        sampler = CreateMaxMinDistSampler(paramSet);
+	sampler = CreateMaxMinDistSampler(paramSet);
     else if (name == "halton")
-        sampler = CreateHaltonSampler(paramSet, film->GetSampleBounds());
+	sampler = CreateHaltonSampler(paramSet, film->GetSampleBounds());
     else if (name == "sobol")
-        sampler = CreateSobolSampler(paramSet, film->GetSampleBounds());
+	sampler = CreateSobolSampler(paramSet, film->GetSampleBounds());
     else if (name == "random")
-        sampler = CreateRandomSampler(paramSet);
+	sampler = CreateRandomSampler(paramSet);
     else if (name == "stratified")
-        sampler = CreateStratifiedSampler(paramSet);
+	sampler = CreateStratifiedSampler(paramSet);
+    else if (name == "r2")
+	sampler = CreateR2SequenceSampler(paramSet);
     else
         Warning("Sampler \"%s\" unknown.", name.c_str());
     paramSet.ReportUnused();
